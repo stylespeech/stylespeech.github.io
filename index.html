@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="generator" content="Hugo 0.66.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700" rel="stylesheet" type="text/css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/github.min.css">
+<link rel="stylesheet" href="css/normalize.css">
+<link rel="stylesheet" href="css/skeleton.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="alternate" href="index.xml" type="application/rss+xml" title="SpeechResearch">
+<title>Meta-StyleSpeech: Multi-Style Adaptive Text to Speech Generation</title>
+</head>
+<body>
+
+<div class="container">
+	<main role="main">
+		<article>
+      
+      <h3 class="title">Meta-StyleSpeech: Multi-Style Adaptive Text to Speech Generation</h3>
+      
+      <p class="authors"><strong>Dongchan Min, DongBok Lee, Eunho Yang, Sung Ju Hwang</strong></p>
+      <div class="abstract">
+        <p><strong>Abstract</strong><br>
+          With rapid progress in neural text-to-speech (TTS) models, personalized speech generation is now in high demand for many applications. 
+          For practical applicability, a TTS model should generate high-quality speech with only a few audio samples from the given speaker, that are also short in length. 
+          However, existing methods either require to fine-tune the model or achieve low adaptation quality without fine-tuning. 
+          In this work, we propose StyleSpeech, a new TTS model which not only synthesizes high-quality speech but also effectively adapts to new speakers. 
+          Specifically, we propose Style-Adaptive Layer Normalization (SALN) which aligns gain and bias of the text input according to the style extracted from a reference speech audio. 
+          With SALN, our model effectively synthesizes speech in the style of the target speaker even from a single speech audio. 
+          Furthermore, to enhance StyleSpeech's adaptation to speech from new speakers, we extend it to Meta-StyleSpeech by introducing two discriminators trained with style prototypes, and performing episodic training. 
+          The experimental results show that our models generate high-quality speech which accurately follows the speaker's voice with single short-duration (1-3 sec) speech audio, significantly outperforming baselines.
+        </p>
+      </div>
+
+      <a href="https://arxiv.org/abs/2106.03153">[paper]</a>
+      <a href="https://github.com/KevinMIN95/StyleSpeech">[code]</a>
+
+    
+		
+      <h4 class="section">Contents</h4>
+      <div>
+        <b><a href="#4.2">(Section 4.2) Evaluation on Trained Speakers</a></b><br>
+        <b><a href="#4.3">(Section 4.3) Unseen Speakers Adaptation</a></b><br>
+        <a href="#4.3.1" style="margin: 40px;">1. Varying Lengths of Reference Audios</a><br>
+        <a href="#4.3.2" style="margin: 40px;">2. Gender and Accent</a><br>
+        <b><a href="#4.4">(Section 4.4) Ablation Studies</a></b><br>
+      </div>
+
+
+      <p id="4.2"></p>
+      <h4 class="section">(Section 4.2) Evaluation on Trained Speakers</h4>
+
+
+      <p class="transcript"><em>LibriTTS : 'if i presume to begin,' said blenkiron, it's because i reckon my story is the shortest.</em></p>
+      <table>
+        <thead style="border-bottom: 1px solid #E1E1E1;"><tr>
+        <th>Reference Audio</th>
+        <th>Model</th>
+        <th></th>
+        </tr></thead>
+        <tbody>
+        <tr>
+        <td rowspan="2" style="border-bottom: 1px solid #E1E1E1;"></td>
+        <td><b><p>GT</p></b></td>
+        <td><audio controls="controls"><source src="audios/4.2/gt/1463_gt.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr  style="border-bottom: 1px solid #E1E1E1;">
+        <td><b><p>GT mel + MelGAN</p></b></td>
+        <td><audio controls="controls"><source src="audios/4.2/gt+mel/1463_gt+mel.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+          <td><hr style="width:5%; border-top: 2.7px solid black;"></td>
+          <td><b><p>DeepVoice3</p></b></td>
+          <td><audio controls="controls"><source src="audios/4.2/dv/1463_dv3.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          </tr>
+        <tr>
+        <td rowspan="5"><audio controls="controls"><source src="audios/4.2/infer/1463_infer.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        <td><b><p>GMVAE</p></b></td>
+        <td><audio controls="controls"><source src="audios/4.2/gm/1463_gm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+        <td><b><p>Multi-speaker FS2(<em>vanila</em>)</p></b></td>
+        <td><audio controls="controls"><source src="audios/4.2/vanila/1463_vanila.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+        <td><b><p>Multi-speaker FS2+<em>d</em>-vector</p></b></td>
+        <td><audio controls="controls"><source src="audios/4.2/d-vector/1463_d-vector.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+        <td><b><p>StyleSpeech</p></b></td>
+        <td><audio controls="controls"><source src="audios/4.2/ss/1463_ss.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+        <td><b><p>Meta-StyleSpeech</p></b></td>
+        <td><audio controls="controls"><source src="audios/4.2/ms/1463_ms.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr></tbody>
+      </table>
+
+      <p class="transcript"><em>LibriTTS : the standard of measurement these days is the ability to serve.</em></p>
+      <table>
+        <thead style="border-bottom: 1px solid #E1E1E1;"><tr>
+        <th>Reference Audio</th>
+        <th>Model</th>
+        <th></th>
+        </tr></thead>
+        <tbody>
+        <tr>
+        <td rowspan="2" style="border-bottom: 1px solid #E1E1E1;"></td>
+        <td><b><p>GT</p></b></td>
+        <td><audio controls="controls"><source src="audios/4.2/gt/6492_gt.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr  style="border-bottom: 1px solid #E1E1E1;">
+        <td><b><p>GT mel + MelGAN</p></b></td>
+        <td><audio controls="controls"><source src="audios/4.2/gt+mel/6492_gt+mel.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+          <td><hr style="width:5%; border-top: 2.7px solid black;"></td>
+          <td><b><p>DeepVoice3</p></b></td>
+          <td><audio controls="controls"><source src="audios/4.2/dv/6492_dv3.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          </tr>
+        <tr>
+        <td rowspan="5"><audio controls="controls"><source src="audios/4.2/infer/6492_infer.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        <td><b><p>GMVAE</p></b></td>
+        <td><audio controls="controls"><source src="audios/4.2/gm/6492_gm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+        <td><b><p>Multi-speaker FS2(<em>vanila</em>)</p></b></td>
+        <td><audio controls="controls"><source src="audios/4.2/vanila/6492_vanila.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+        <td><b><p>Multi-speaker FS2+<em>d</em>-vector</p></b></td>
+        <td><audio controls="controls"><source src="audios/4.2/d-vector/6492_d-vector.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+        <td><b><p>StyleSpeech</p></b></td>
+        <td><audio controls="controls"><source src="audios/4.2/ss/6492_ss.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+        <td><b><p>Meta-StyleSpeech</p></b></td>
+        <td><audio controls="controls"><source src="audios/4.2/ms/6492_ms.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr></tbody>
+      </table>
+
+
+      <p class="transcript"><em>LibriTTS : after years of watching the processes of nature, he says, i can no more doubt the existence of an intelligence that is running things than i do of the existence of myself.</em></p>
+      <table>
+        <thead style="border-bottom: 1px solid #E1E1E1;"><tr>
+        <th>Reference Audio</th>
+        <th>Model</th>
+        <th></th>
+        </tr></thead>
+        <tbody>
+        <tr>
+        <td rowspan="2" style="border-bottom: 1px solid #E1E1E1;"></td>
+        <td><b><p>GT</p></b></td>
+        <td><audio controls="controls"><source src="audios/4.2/gt/2204_gt.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr  style="border-bottom: 1px solid #E1E1E1;">
+        <td><b><p>GT mel + MelGAN</p></b></td>
+        <td><audio controls="controls"><source src="audios/4.2/gt+mel/2204_gt+mel.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+          <td><hr style="width:5%; border-top: 2.7px solid black;"></td>
+          <td><b><p>DeepVoice3</p></b></td>
+          <td><audio controls="controls"><source src="audios/4.2/dv/2204_dv3.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          </tr>
+        <tr>
+        <td rowspan="5"><audio controls="controls"><source src="audios/4.2/infer/2204_infer.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        <td><b><p>GMVAE</p></b></td>
+        <td><audio controls="controls"><source src="audios/4.2/gm/2204_gm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+        <td><b><p>Multi-speaker FS2(<em>vanila</em>)</p></b></td>
+        <td><audio controls="controls"><source src="audios/4.2/vanila/2204_vanila.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+        <td><b><p>Multi-speaker FS2+<em>d</em>-vector</p></b></td>
+        <td><audio controls="controls"><source src="audios/4.2/d-vector/2204_d-vector.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+        <td><b><p>StyleSpeech</p></b></td>
+        <td><audio controls="controls"><source src="audios/4.2/ss/2204_ss.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+        <td><b><p>Meta-StyleSpeech</p></b></td>
+        <td><audio controls="controls"><source src="audios/4.2/ms/2204_ms.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr></tbody>
+      </table>
+
+      <p class="transcript"><em>LibriTTS : now this child was too old to be nursed, as everybody told her; for he could run, say two yards alone, and perhaps four or five, by holding to handles.</em></p>
+      <table>
+        <thead style="border-bottom: 1px solid #E1E1E1;"><tr>
+        <th>Reference Audio</th>
+        <th>Model</th>
+        <th></th>
+        </tr></thead>
+        <tbody>
+        <tr>
+        <td rowspan="2" style="border-bottom: 1px solid #E1E1E1;"></td>
+        <td><b><p>GT</p></b></td>
+        <td><audio controls="controls"><source src="audios/4.2/gt/3105_gt.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr  style="border-bottom: 1px solid #E1E1E1;">
+        <td><b><p>GT mel + MelGAN</p></b></td>
+        <td><audio controls="controls"><source src="audios/4.2/gt+mel/3105_gt+mel.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+          <td><hr style="width:5%; border-top: 2.7px solid black;"></td>
+          <td><b><p>DeepVoice3</p></b></td>
+          <td><audio controls="controls"><source src="audios/4.2/dv/3105_dv3.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          </tr>
+        <tr>
+        <td rowspan="5"><audio controls="controls"><source src="audios/4.2/infer/3105_infer.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        <td><b><p>GMVAE</p></b></td>
+        <td><audio controls="controls"><source src="audios/4.2/gm/3105_gm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+        <td><b><p>Multi-speaker FS2(<em>vanila</em>)</p></b></td>
+        <td><audio controls="controls"><source src="audios/4.2/vanila/3105_vanila.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+        <td><b><p>Multi-speaker FS2+<em>d</em>-vector</p></b></td>
+        <td><audio controls="controls"><source src="audios/4.2/d-vector/3105_d-vector.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+        <td><b><p>StyleSpeech</p></b></td>
+        <td><audio controls="controls"><source src="audios/4.2/ss/3105_ss.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+        <td><b><p>Meta-StyleSpeech</p></b></td>
+        <td><audio controls="controls"><source src="audios/4.2/ms/3105_ms.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr></tbody>
+      </table>
+
+
+      
+
+      <!-- 4.3 -->
+
+      <p id="4.3"></p>
+      <h4 class="section">(Section 4.3) Unseen Speakers Adaptation</h4>
+      <h5 id="4.3.1">1. Varying Lengths of Reference Audios</h5>
+      <p class="transcript"><em>VCTK : i have the first six months of next season to prove myself.</em></p>
+      <table>
+        <thead style="border-bottom: 1px solid #E1E1E1;"><tr>
+        <th>Length of reference audio</th>
+        <th>GT</th>
+        <th>Meta-StyleSpeech</th>
+        <th>StyleSpeech</th>
+        <th>Multi-speaker<br>FS2+<em>d</em>-vector</th>
+        <th>Multi-speaker<br>FS2(<em>vanila</em>)</th>
+        <th>GMVAE</th>
+        </tr></thead>
+        <tbody>
+        <tr>
+          <td><p> &lt;1sec </p></td>
+          <td rowspan="4"><audio controls="controls"><source src="audios/4.3/varying/p237_gt.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ms/p237_0.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ss/p237_0.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/d-vector/p237_0.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/vanila/p237_0.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/gm/p237_0.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+          <td><p> 1~3sec </p></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ms/p237_1.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ss/p237_1.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/d-vector/p237_1.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/vanila/p237_1.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/gm/p237_1.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+          <td><p> 1 sentence </p></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ms/p237_2.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ss/p237_2.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/d-vector/p237_2.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/vanila/p237_2.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/gm/p237_2.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+          <td><p> 2 sentence </p></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ms/p237_3.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ss/p237_3.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/d-vector/p237_3.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/vanila/p237_3.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/gm/p237_3.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        </tbody>
+      </table>
+
+      <p class="transcript"><em>VCTK : he's an excellent defender, strong and quick.</em></p>
+      <table>
+        <thead style="border-bottom: 1px solid #E1E1E1;"><tr>
+        <th>Length of reference audio</th>
+        <th>GT</th>
+        <th>Meta-StyleSpeech</th>
+        <th>StyleSpeech</th>
+        <th>Multi-speaker<br>FS2+<em>d</em>-vector</th>
+        <th>Multi-speaker<br>FS2(<em>vanila</em>)</th>
+        <th>GMVAE</th>
+        </tr></thead>
+        <tbody>
+        <tr>
+          <td><p> &lt;1sec </p></td>
+          <td rowspan="4"><audio controls="controls"><source src="audios/4.3/varying/p297_gt.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ms/p297_0.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ss/p297_0.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/d-vector/p297_0.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/vanila/p297_0.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/gm/p297_0.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+          <td><p> 1~3sec </p></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ms/p297_1.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ss/p297_1.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/d-vector/p297_1.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/vanila/p297_1.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/gm/p297_1.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+          <td><p> 1 sentence </p></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ms/p297_2.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ss/p297_2.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/d-vector/p297_2.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/vanila/p297_2.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/gm/p297_2.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+          <td><p> 2 sentence </p></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ms/p297_3.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ss/p297_3.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/d-vector/p297_3.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/vanila/p297_3.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/gm/p297_3.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        </tbody>
+      </table>
+
+      <p class="transcript"><em>VCTK : he was a crazy man.</em></p>
+      <table>
+        <thead style="border-bottom: 1px solid #E1E1E1;"><tr>
+        <th>Length of reference audio</th>
+        <th>GT</th>
+        <th>Meta-StyleSpeech</th>
+        <th>StyleSpeech</th>
+        <th>Multi-speaker<br>FS2+<em>d</em>-vector</th>
+        <th>Multi-speaker<br>FS2(<em>vanila</em>)</th>
+        <th>GMVAE</th>
+        </tr></thead>
+        <tbody>
+        <tr>
+          <td><p> &lt;1sec </p></td>
+          <td rowspan="4"><audio controls="controls"><source src="audios/4.3/varying/p241_gt.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ms/p241_0.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ss/p241_0.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/d-vector/p241_0.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/vanila/p241_0.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/gm/p241_0.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+          <td><p> 1~3sec </p></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ms/p241_1.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ss/p241_1.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/d-vector/p241_1.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/vanila/p241_1.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/gm/p241_1.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+          <td><p> 1 sentence </p></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ms/p241_2.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ss/p241_2.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/d-vector/p241_2.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/vanila/p241_2.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/gm/p241_2.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+          <td><p> 2 sentence </p></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ms/p241_3.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ss/p241_3.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/d-vector/p241_3.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/vanila/p241_3.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/gm/p241_3.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        </tbody>
+      </table>
+
+      <p class="transcript"><em>VCTK : i could live without the attention, he admitted.</em></p>
+      <table>
+        <thead style="border-bottom: 1px solid #E1E1E1;"><tr>
+        <th>Length of reference audio</th>
+        <th>GT</th>
+        <th>Meta-StyleSpeech</th>
+        <th>StyleSpeech</th>
+        <th>Multi-speaker<br>FS2+<em>d</em>-vector</th>
+        <th>Multi-speaker<br>FS2(<em>vanila</em>)</th>
+        <th>GMVAE</th>
+        </tr></thead>
+        <tbody>
+        <tr>
+          <td><p> &lt;1sec </p></td>
+          <td rowspan="4"><audio controls="controls"><source src="audios/4.3/varying/p280_gt.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ms/p280_0.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ss/p280_0.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/d-vector/p280_0.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/vanila/p280_0.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/gm/p280_0.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+          <td><p> 1~3sec </p></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ms/p280_1.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ss/p280_1.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/d-vector/p280_1.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/vanila/p280_1.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/gm/p280_1.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+          <td><p> 1 sentence </p></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ms/p280_2.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ss/p280_2.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/d-vector/p280_2.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/vanila/p280_2.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/gm/p280_2.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+          <td><p> 2 sentence </p></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ms/p280_3.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/ss/p280_3.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/d-vector/p280_3.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/vanila/p280_3.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/varying/gm/p280_3.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        </tbody>
+      </table>
+
+
+      <h5 id="4.3.2">2. Gender and Accent</h5>
+      <p class="transcript"><em>VCTK</em></p>
+      <table>
+        <thead style="border-bottom: 1px solid #E1E1E1;"><tr>
+        <th>Gender</th>
+        <th>GT</th>
+        <th>Meta-StyleSpeech</th>
+        </tr></thead>
+        <tbody>
+        <tr>
+          <td rowspan="2"><p> Male </p></td>
+          <td><audio controls="controls"><source src="audios/4.3/gender/male_gt_1.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/gender/male_ms_1.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+          <td><audio controls="controls"><source src="audios/4.3/gender/male_gt_2.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/gender/male_ms_2.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+          <td rowspan="2"><p> Female </p></td>
+          <td><audio controls="controls"><source src="audios/4.3/gender/female_gt_1.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/gender/female_ms_1.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+          <td><audio controls="controls"><source src="audios/4.3/gender/female_gt_2.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/gender/female_ms_2.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        </tbody>
+      </table>
+
+      <p class="transcript"><em>VCTK</em></p>
+      <table>
+        <thead style="border-bottom: 1px solid #E1E1E1;"><tr>
+        <th>Accent</th>
+        <th>GT</th>
+        <th>Meta-StyleSpeech</th>
+        </tr></thead>
+        <tbody>
+        <tr>
+          <td><p> American </p></td>
+          <td><audio controls="controls"><source src="audios/4.3/accent/american_gt.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/accent/american_ms.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+          <td><p> Britsh </p></td>
+          <td><audio controls="controls"><source src="audios/4.3/accent/british_gt.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/accent/british_ms.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+          <td><p> Indian </p></td>
+          <td><audio controls="controls"><source src="audios/4.3/accent/indian_gt.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/accent/indian_ms.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+          <td><p> African </p></td>
+          <td><audio controls="controls"><source src="audios/4.3/accent/african_gt.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/accent/african_ms.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        <tr>
+          <td><p> Australian </p></td>
+          <td><audio controls="controls"><source src="audios/4.3/accent/australian_gt.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.3/accent/australian_ms.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+      
+        </tbody>
+      </table>
+
+      <!-- 4.4 -->
+      <p id="4.4"></p>
+      <h4 class="section">(Section 4.4) Ablation Studies</h4>
+      <p class="transcript"><em>LibriTTS(seen) : after years of watching the processes of nature, he says, i can no more doubt the existence of an intelligence that is running things than i do of the existence of myself.</em></p>
+      <table>
+        <thead style="border-bottom: 1px solid #E1E1E1;"><tr>
+        <th>Meta-StyleSpeech</th>
+        <th>w/o $D_t$</th>
+        <th>w/o $D_s$</th>
+        <th>w/o $L_{cls}$</th>
+        </tr></thead>
+        <tbody>
+        <tr>
+          <td><audio controls="controls"><source src="audios/4.4/libri/libri_ms.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.4/libri/libri_noTD.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.4/libri/libri_noSD.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.4/libri/libri_noCE.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        </tbody>
+      </table>
+
+      <p class="transcript"><em>VCTK(unseen) : however, they continued in their pursuit of victory.</em></p>
+      <table>
+        <thead style="border-bottom: 1px solid #E1E1E1;"><tr>
+        <th>Meta-StyleSpeech</th>
+        <th>w/o $D_t$</th>
+        <th>w/o $D_s$</th>
+        <th>w/o $L_{cls}$</th>
+        </tr></thead>
+        <tbody>
+        <tr>
+          <td><audio controls="controls"><source src="audios/4.4/vctk/vctk_ms.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.4/vctk/vctk_noTD.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.4/vctk/vctk_noSD.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+          <td><audio controls="controls"><source src="audios/4.4/vctk/vctk_noPro.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+        </tr>
+        </tbody>
+      </table>
+
+		</article>
+	</main>
+
+
+</div>
+
+<script>
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-139981676-1', 'auto');
+	ga('send', 'pageview');
+</script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+<script type="text/x-mathjax-config">
+     MathJax.Hub.Config({
+         HTML: ["input/TeX","output/HTML-CSS"],
+         TeX: {
+                Macros: {
+                         bm: ["\\boldsymbol{#1}", 1],
+                         argmax: ["\\mathop{\\rm arg\\,max}\\limits"],
+                         argmin: ["\\mathop{\\rm arg\\,min}\\limits"]},
+                extensions: ["AMSmath.js","AMSsymbols.js"],
+                equationNumbers: { autoNumber: "AMS" } },
+         extensions: ["tex2jax.js"],
+         jax: ["input/TeX","output/HTML-CSS"],
+         tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                    displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+                    processEscapes: true },
+         "HTML-CSS": { availableFonts: ["TeX"],
+                       linebreaks: { automatic: true } }
+     });
+ </script>
+
+ <script type="text/x-mathjax-config">
+     MathJax.Hub.Config({
+       tex2jax: {
+         skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+       }
+     });
+ </script>
+
+ <script type="text/javascript" async
+   src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML">
+ </script>
+
+</body>
+</html>
